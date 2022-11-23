@@ -1,4 +1,4 @@
-## 三相脳循環モデル+Bayed optimization
+## 三相脳循環モデル+Bayes optimization
 
 ## 依存ライブラリ
 - Boost (https://www.boost.org/)
