@@ -149,12 +149,17 @@ public:
             getline(ifs,str);
             evaluation_phi[i] = stod(str);
         }
+        ifs.close();
         double evaluation=0.0;
         for(int i=0; i<Vessel.numOfElm; i++){
             evaluation += pow(evaluation_phi[i]-C_sum[i],2.0);
         }
         evaluation /= Vessel.numOfElm;
         std::cout << "r_vc:" << xin(0) << " " << "r_cv:" << xin(1) << " " << "r_vi:" << xin(2) << " " << "r_iv:" << xin(3) << " " << "r_ci:" << xin(4) << " " << "r_ic:" << xin(5) << " " << "J:" << evaluation << std::endl;
+        
+        Vessel.reset();
+        Fluid.reset();
+        Solid.reset();
         return evaluation;
     };
 

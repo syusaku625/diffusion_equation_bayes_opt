@@ -273,36 +273,43 @@ void twodimensinal_diffusion::transform_point_data_to_cell_data(std::vector<doub
 }
 
 // C=A*B
-void twodimensinal_diffusion::MKL_matrix_product(const vector<vector<double>> A_r, const vector<double> B_r, vector<double> &C_r, int m, int k, int n)
+//void twodimensinal_diffusion::MKL_matrix_product(const vector<vector<double>> A_r, const vector<double> B_r, vector<double> &C_r, int m, int k, int n)
+//{
+//  double *A, *B, *C;
+//  A = (double*)mkl_malloc(m*k*sizeof(double),64);
+//  B = (double*)mkl_malloc(k*n*sizeof(double),64);
+//  C = (double*)mkl_malloc(m*n*sizeof(double),64);
+//  double alpha, beta;
+//  alpha = 1.0; beta = 0.0;
+//  if (A == NULL || B == NULL || C == NULL) {
+//    //ERROR: Can't allocate memory for matrices. Aborting...
+//    mkl_free(A);
+//    mkl_free(B);
+//    mkl_free(C);
+//    exit(1);
+//  }
+//  //Intializing matrix data
+//  for(int i=0; i<m; i++){
+//    for(int j=0; j<k; j++){
+//      A[i*m+j]=A_r[i][j];
+//    }
+//  }
+//  for(int i=0; i<m; i++){
+//    B[i]=B_r[i];
+//    C[i]=0.0;
+//  }
+//  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, k, B, n, beta, C, n);
+//  for(int i=0; i<m; i++){
+//    C_r[i]=C[i];
+//  }
+//  mkl_free(A);
+//  mkl_free(B);
+//  mkl_free(C);
+//}
+
+void twodimensinal_diffusion::reset()
 {
-  double *A, *B, *C;
-  A = (double*)mkl_malloc(m*k*sizeof(double),64);
-  B = (double*)mkl_malloc(k*n*sizeof(double),64);
-  C = (double*)mkl_malloc(m*n*sizeof(double),64);
-  double alpha, beta;
-  alpha = 1.0; beta = 0.0;
-  if (A == NULL || B == NULL || C == NULL) {
-    //ERROR: Can't allocate memory for matrices. Aborting...
-    mkl_free(A);
-    mkl_free(B);
-    mkl_free(C);
-    exit(1);
+  for(int i=0; i<numOfNode; i++){
+    C[i] = 0.0;
   }
-  //Intializing matrix data
-  for(int i=0; i<m; i++){
-    for(int j=0; j<k; j++){
-      A[i*m+j]=A_r[i][j];
-    }
-  }
-  for(int i=0; i<m; i++){
-    B[i]=B_r[i];
-    C[i]=0.0;
-  }
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, k, B, n, beta, C, n);
-  for(int i=0; i<m; i++){
-    C_r[i]=C[i];
-  }
-  mkl_free(A);
-  mkl_free(B);
-  mkl_free(C);
 }

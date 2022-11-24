@@ -54,14 +54,14 @@ include_directories(${Boost_INCLUDE_DIRS})
 MESSAGE(${Boost_INCLUDE_DIRS})
 
 # MKL
-set(MKL_ARCH "intel64")
-set(MKL_LINK "static")
-set(MKL_INTERFACE "lp64")
-set(MKL_THREADING "intel_thread")
-set(MKL_MPI "intelmpi")
-find_package(MKL REQUIRED C CXX)
-include_directories(${MKL_INCLUDE_DIR})
-MESSAGE(${MKL_LIBRARIES})
+#set(MKL_ARCH "intel64")
+#set(MKL_LINK "static")
+#set(MKL_INTERFACE "lp64")
+#set(MKL_THREADING "intel_thread")
+#set(MKL_MPI "intelmpi")
+#find_package(MKL REQUIRED C CXX)
+#include_directories(${MKL_INCLUDE_DIR})
+#MESSAGE(${MKL_LIBRARIES})
 
 # HDF5
 find_package (HDF5 REQUIRED COMPONENTS C CXX)

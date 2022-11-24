@@ -11,7 +11,7 @@
 #include<iostream>
 #include<omp.h>
 #include<set>
-#include "mkl.h"
+//#include "mkl.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -73,7 +73,8 @@ class twodimensinal_diffusion{
         double access_c(int ic);
         void transform_point_data_to_cell_data(std::vector<double> &element_C, std::vector<double> C);
         void transform_point_data_to_cell_data_phi(std::vector<double> &phiC, std::vector<double> C);
-        void MKL_matrix_product(const std::vector<std::vector<double>> A_r, const std::vector<double> B_r, std::vector<double> &C_r, int m, int k, int n);
+        void reset();
+        //void MKL_matrix_product(const std::vector<std::vector<double>> A_r, const std::vector<double> B_r, std::vector<double> &C_r, int m, int k, int n);
 
 };
 #endif

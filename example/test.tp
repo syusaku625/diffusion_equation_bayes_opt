@@ -9,7 +9,7 @@ Geometry
 Fluid
 {
   dt = 0.1
-  time_step = 10
+  time_step = 3600
   output_interval = 100
   diffusion_coefficient = 2.6e-3
   outputDir = "fluid"
@@ -25,7 +25,7 @@ Fluid
 Solid
 {
   dt = 0.1
-  time_step = 10
+  time_step = 3600
   output_interval = 100
   diffusion_coefficient = 0.75e-3
   outputDir = "solid"
@@ -39,7 +39,7 @@ Solid
 Vessel
 {
   dt = 0.1
-  time_step = 10
+  time_step = 3600
   output_interval = 100
   diffusion_coefficient = 1
   outputDir = "vessel"
