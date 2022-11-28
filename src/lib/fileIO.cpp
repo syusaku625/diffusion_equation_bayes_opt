@@ -1,5 +1,6 @@
 #include"two_diffusion.hpp"
 #include"shapefunction.hpp"
+#include"diffusion_function.hpp"
 using namespace H5;
 using namespace std;
 
@@ -160,30 +161,6 @@ void twodimensinal_diffusion::input_info(std::string input_file)
             cout << label << " is not set" << endl;
             exit(0);
         }
-        //resistance parameter from vessel to csf
-        label = base_label + "/couplint_coefficient_vc";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_vc)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
-        //resistance parameter from csf to vessel
-        label = base_label + "/couplint_coefficient_cv";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_cv)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
-        //resistance parameter from csf to isf
-        label = base_label + "/couplint_coefficient_ci";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_ci)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
-        //resistance parameter from isf to csf
-        label = base_label + "/couplint_coefficient_ic";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_ic)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
         label = base_label + "/phi_file";
         if ( !tp.getInspectedValue(label,phi_file)){
             cout << label << " is not set" << endl;
@@ -226,18 +203,6 @@ void twodimensinal_diffusion::input_info(std::string input_file)
         }
         label = base_label + "/boundary_file";
         if ( !tp.getInspectedValue(label,boundary_file)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
-        //resistance parameter from vessel to isf
-        label = base_label + "/couplint_coefficient_vi";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_vi)){
-            cout << label << " is not set" << endl;
-            exit(0);
-        }
-        //resistance parameter from isf to vessel
-        label = base_label + "/couplint_coefficient_iv";
-        if ( !tp.getInspectedValue(label,coupling_coefficient_iv)){
             cout << label << " is not set" << endl;
             exit(0);
         }
@@ -496,5 +461,65 @@ void twodimensinal_diffusion::hdf5_dump(int ic)
     vector<double> phiC(numOfElm);
     transform_point_data_to_cell_data(phiC, C);
     exportHDF5_double_1D(file, dataName, phiC, phiC.size());
+  }
+}
+
+void DiffusionModel::hdf5_export_parameter_and_cost_function(H5::H5File &file, const std::string &dataName, const double i_data)
+{
+  H5std_string DATASET_NAME(dataName.c_str());
+  hsize_t dim[1] = {static_cast<hsize_t>(1)}; // dataset dimensions
+  H5::DataSpace dataspace(1, dim);
+  double *data;
+  data = new double[1];
+  for (int i = 0; i < static_cast<int>(1); i++) {
+    data[i] = i_data;
+  }
+  H5::IntType datatype(H5::PredType::NATIVE_DOUBLE);
+  datatype.setOrder(H5T_ORDER_LE);
+  H5::DataSet dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+  dataset.write(&data[0], H5::PredType::NATIVE_DOUBLE);
+  delete[] data;
+}
+
+void DiffusionModel::hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, const double r_ci, const double r_ic)
+{
+  H5std_string FILE_NAME(output_h5_name.c_str());
+  if (ic == 0) {
+    H5File file(FILE_NAME, H5F_ACC_TRUNC);
+    std::string dataName;
+    std::string Gr = "/"+to_string(ic);
+    file.createGroup(Gr.c_str());
+    Group group = file.openGroup(Gr.c_str());
+    dataName = Gr + "/r_vc";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_vc);
+    dataName = Gr + "/r_cv";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_cv);
+    dataName = Gr + "/r_ci";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_ci);
+    dataName = Gr + "/r_ic";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_ic);
+    dataName = Gr + "/r_vi";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_vi);
+    dataName = Gr + "/r_iv";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_iv);
+  }
+  else {
+    H5File file(FILE_NAME, H5F_ACC_RDWR);
+    std::string dataName;
+    std::string Gr = "/" + to_string(ic);
+    file.createGroup(Gr.c_str());
+    Group group = file.openGroup(Gr.c_str());
+    dataName = Gr + "/r_vc";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_vc);
+    dataName = Gr + "/r_cv";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_cv);
+    dataName = Gr + "/r_ci";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_ci);
+    dataName = Gr + "/r_ic";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_ic);
+    dataName = Gr + "/r_vi";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_vi);
+    dataName = Gr + "/r_iv";
+    hdf5_export_parameter_and_cost_function(file, dataName, r_iv);
   }
 }

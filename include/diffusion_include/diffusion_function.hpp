@@ -24,6 +24,7 @@
 #define __TEST_FUNCTIONS_HPP__
 
 #define _USE_MATH_DEFINES
+#include <H5Cpp.h>
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -68,14 +69,15 @@ public:
         Q_vi.resize(Vessel.numOfNode); Q_iv.resize(Vessel.numOfNode);
         Q_ci.resize(Vessel.numOfNode); Q_ic.resize(Vessel.numOfNode);
         Vessel.boundary_setting(0.0, Q_cv, Q_iv);
+
         C_sum.resize(Vessel.numOfElm);
+        input_evaluate_phi(Vessel.numOfElm);
+        iter_count=0;
     };
 
     double evaluateSample( const vectord& xin){
-        //std::cout << "main loop" << std::endl;
         
         for(int i=0; i<Vessel.time; i++){
-            //std::cout << i << std::endl;
             std::vector<double> element_C_vessel(Vessel.numOfElm), element_C_Fluid(Fluid.numOfElm), element_C_Solid(Solid.numOfElm);
             Vessel.transform_point_data_to_cell_data(element_C_vessel, Vessel.C);
             Fluid.transform_point_data_to_cell_data(element_C_Fluid, Fluid.C);
@@ -109,20 +111,7 @@ public:
             Vessel.boundary_setting(Vessel.dt*i, Q_vc, Q_vi);
             Fluid.time_step(Q_vc, Q_ci, Vessel.dt*i);
             Solid.time_step(Q_vi, Q_ci, Vessel.dt*i);
-            //each phase O17 hdf5 dump
-            //if(i%Fluid.output_interval==0){
-            //    Fluid.dump(i/Fluid.output_interval);
-            //    Fluid.hdf5_dump(i/Fluid.output_interval);
-            //}
-            //if(i%Solid.output_interval==0){
-            //    Solid.dump(i/Solid.output_interval);
-            //    Solid.hdf5_dump(i/Solid.output_interval);
-            //}
-            //if(i%Vessel.output_interval==0){
-            //    Vessel.dump(i/Vessel.output_interval);
-            //    Vessel.hdf5_dump(i/Vessel.output_interval);
-            //}
-            //sum of O17 hdf5 dump
+
             if(i%Vessel.output_interval==0){
                 std::vector<double> Vessel_phiC(Vessel.numOfElm),CSF_phiC(Fluid.numOfElm),ISF_phiC(Solid.numOfElm);
                 Vessel.transform_point_data_to_cell_data_phi(Vessel_phiC, Vessel.C);
@@ -131,35 +120,21 @@ public:
                 for(int j=0; j<Vessel.numOfElm; j++){
                   C_sum[j] = Vessel_phiC[j] + CSF_phiC[j] + ISF_phiC[j];
                 }
-                std::string dir = "out_C";
-                mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
-                std::string filename = dir + "/test_" + std::to_string(i/Vessel.output_interval) + ".vtu";
-                //std::cout << filename << std::endl;
-                //hdf5_dump("sum_O17.h5",i/Vessel.output_interval,C_sum);
-                //export_vtu(filename,Vessel.element,Vessel.node,C_sum);
             }
         }
-        std::vector<double> evaluation_phi(Vessel.numOfElm);
-        std::ifstream ifs("evaluation_C.dat");
-        if(!ifs){
-            std::cout << "can't open evaluation_C.dat" << std::endl;
-        }
-        std::string str;
-        for(int i=0; i<Vessel.numOfElm; i++){
-            getline(ifs,str);
-            evaluation_phi[i] = stod(str);
-        }
-        ifs.close();
+        
         double evaluation=0.0;
         for(int i=0; i<Vessel.numOfElm; i++){
             evaluation += pow(evaluation_phi[i]-C_sum[i],2.0);
         }
         evaluation /= Vessel.numOfElm;
         std::cout << "r_vc:" << xin(0) << " " << "r_cv:" << xin(1) << " " << "r_vi:" << xin(2) << " " << "r_iv:" << xin(3) << " " << "r_ci:" << xin(4) << " " << "r_ic:" << xin(5) << " " << "J:" << evaluation << std::endl;
-        
+        hdf5_dump("r_parameter.h5", iter_count, xin(0), xin(1), xin(2), xin(3), xin(4), xin(5 ));
+
         Vessel.reset();
         Fluid.reset();
         Solid.reset();
+        iter_count++;
         return evaluation;
     };
 
@@ -186,6 +161,29 @@ public:
     std::vector<double> Q_iv;
     std::vector<double> Q_ci;
     std::vector<double> Q_ic;
+    std::vector<double> evaluation_phi;
+    double iter_count=0;
+    double evaluation;
+
+    void input_evaluate_phi(int numOfElm)
+    {
+      evaluation_phi.resize(numOfElm);
+      std::ifstream ifs("evaluation_C.dat");
+      if(!ifs){
+          std::cout << "can't open evaluation_C.dat" << std::endl;
+      }
+      std::string str;
+      for(int i=0; i<Vessel.numOfElm; i++){
+          getline(ifs,str);
+          evaluation_phi[i] = stod(str);
+      }
+      ifs.close();
+    }
+    
+    void hdf5_export_parameter_and_cost_function(H5::H5File &file, const std::string &dataName, const double i_data);
+    void hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, const double r_ci, const double r_ic);
+
+
 };
 
 
