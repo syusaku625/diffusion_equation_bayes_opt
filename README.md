@@ -1,6 +1,6 @@
 ## 三相脳循環モデル+Bayes optimization ![ソースコードサイズ](https://img.shields.io/github/repo-size/syusaku625/diffusion_equation_bayes_opt)
 
-## 依存ライブラリ
+## Dependencies
 ![ソースコードサイズ](https://img.shields.io/badge/cmake-v.3.16.3-yellowgreen)
 ![ソースコードサイズ](https://img.shields.io/badge/boost-v.1.71.0-green)
 ![ソースコードサイズ](https://img.shields.io/badge/HDF5-v.1.12.2-orange)
