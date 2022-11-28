@@ -81,7 +81,15 @@ void twodimensinal_diffusion::input_phi()
   phi.resize(numOfElm);
   for(int i=0; i<numOfElm; i++){
     getline(ifs,str);
-    phi[i] = stod(str);
+    istringstream stream(str);
+    vector<double> phi_tmp(3);
+    for(int j=0;j<3;j++){
+      getline(stream,tmp,' ');
+      phi_tmp[j] = stod(tmp);
+    }
+    if(material_judge=="V") phi[i] = phi_tmp[0];
+    if(material_judge=="F") phi[i] = phi_tmp[1];
+    if(material_judge=="S") phi[i] = phi_tmp[2];
   }
   ifs.close();
 

@@ -14,7 +14,7 @@ Fluid
   diffusion_coefficient = 2.6e-3
   outputDir = "fluid"
   boundary_file = "boundary_fluid.dat"
-  phi_file = "fluid_phi.dat"
+  phi_file = "phi.dat"
   output_h5_name = "fluid_c.h5"
 }
 
@@ -26,7 +26,7 @@ Solid
   diffusion_coefficient = 0.75e-3
   outputDir = "solid"
   boundary_file = "boundary_solid.dat"
-  phi_file = "solid_phi.dat"
+  phi_file = "phi.dat"
   output_h5_name = "solid_c.h5"
 }
 
@@ -38,6 +38,6 @@ Vessel
   diffusion_coefficient = 1
   outputDir = "vessel"
   boundary_file = "boundary_vessel.dat"
-  phi_file = "vessel_phi.dat"
+  phi_file = "phi.dat"
   output_h5_name = "vessel_c.h5"
 }
