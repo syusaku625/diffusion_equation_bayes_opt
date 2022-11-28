@@ -1,4 +1,4 @@
-## multi-diffusion brain circulation model+Bayes optimization ![ソースコードサイズ](https://img.shields.io/github/repo-size/syusaku625/diffusion_equation_bayes_opt)
+## multi-diffusion brain circulation model+Bayes optimization 
 
 ## Dependencies
 ![ソースコードサイズ](https://img.shields.io/badge/cmake-v.3.16.3-yellowgreen)
