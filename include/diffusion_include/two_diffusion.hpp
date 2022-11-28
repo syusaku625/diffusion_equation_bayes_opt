@@ -48,6 +48,7 @@ class twodimensinal_diffusion{
         std::vector<std::vector<int>> element;
         std::vector<std::vector<double>> D;
         std::vector<std::vector<double>> gauss;
+        std::vector<double> evaluation_phi;
         TextParser tp;
         void phase_set(std::string mat){
             material_judge=mat;

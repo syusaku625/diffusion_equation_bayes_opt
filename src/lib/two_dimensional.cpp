@@ -157,11 +157,7 @@ void twodimensinal_diffusion::boundary_setting(double time_t, vector<double> Q_c
       if(time_t>120.0) {
         C[boundary_node[i]] = ((-boundary_value[i]/480.0)*time_t+(5.0/4.0)-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
       }
-      //double param = 0.020, sigma=0.8, mu=-20.0;
-      //double time_tmp = ((time_t-mu)-(time*dt-mu)/2.0)*param;
-      //C[boundary_node[i]] = (exp(-pow(time_tmp,2.0)/(2.0*pow(sigma,2.0)))-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
     }
-    //cout << time_t << " " << C[boundary_node[11036]] << endl; 
   }
 }
 
@@ -271,41 +267,6 @@ void twodimensinal_diffusion::transform_point_data_to_cell_data(std::vector<doub
     element_C[i]=tmp_C;
   } 
 }
-
-// C=A*B
-//void twodimensinal_diffusion::MKL_matrix_product(const vector<vector<double>> A_r, const vector<double> B_r, vector<double> &C_r, int m, int k, int n)
-//{
-//  double *A, *B, *C;
-//  A = (double*)mkl_malloc(m*k*sizeof(double),64);
-//  B = (double*)mkl_malloc(k*n*sizeof(double),64);
-//  C = (double*)mkl_malloc(m*n*sizeof(double),64);
-//  double alpha, beta;
-//  alpha = 1.0; beta = 0.0;
-//  if (A == NULL || B == NULL || C == NULL) {
-//    //ERROR: Can't allocate memory for matrices. Aborting...
-//    mkl_free(A);
-//    mkl_free(B);
-//    mkl_free(C);
-//    exit(1);
-//  }
-//  //Intializing matrix data
-//  for(int i=0; i<m; i++){
-//    for(int j=0; j<k; j++){
-//      A[i*m+j]=A_r[i][j];
-//    }
-//  }
-//  for(int i=0; i<m; i++){
-//    B[i]=B_r[i];
-//    C[i]=0.0;
-//  }
-//  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, k, B, n, beta, C, n);
-//  for(int i=0; i<m; i++){
-//    C_r[i]=C[i];
-//  }
-//  mkl_free(A);
-//  mkl_free(B);
-//  mkl_free(C);
-//}
 
 void twodimensinal_diffusion::reset()
 {
