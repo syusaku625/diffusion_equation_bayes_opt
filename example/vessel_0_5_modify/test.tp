@@ -1,0 +1,49 @@
+Geometry
+{
+  node_file = "node.dat"
+  element_file = "element.dat"
+  gauss_setting = "square"
+  omp_num_threads = 8
+}
+
+Fluid
+{
+  dt = 0.1
+  time_step = 3600
+  output_interval = 100
+  diffusion_coefficient = 2.6e-3
+  outputDir = "fluid"
+  boundary_file = "boundary_fluid.dat"
+  couplint_coefficient_vc = 0.997656
+  couplint_coefficient_cv = 4.14814e-05
+  couplint_coefficient_ci = 0.0
+  couplint_coefficient_ic = 0.661385
+  phi_file = "remove_bone.dat"
+  output_h5_name = "fluid_c.h5"
+}
+
+Solid
+{
+  dt = 0.1
+  time_step = 3600
+  output_interval = 100
+  diffusion_coefficient = 0.75e-3
+  outputDir = "solid"
+  boundary_file = "boundary_solid.dat"
+  couplint_coefficient_vi = 0.000929843
+  couplint_coefficient_iv = 0.998934
+  phi_file = "remove_bone.dat"
+  output_h5_name = "solid_c.h5"
+}
+
+Vessel
+{
+  dt = 0.1
+  time_step = 3600
+  output_interval = 100
+  diffusion_coefficient = 1
+  outputDir = "vessel"
+  boundary_file = "boundary_vessel.dat"
+  phi_file = "remove_bone.dat"
+  output_h5_name = "vessel_c.h5"
+}
