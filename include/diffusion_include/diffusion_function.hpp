@@ -56,10 +56,15 @@ public:
         Vessel.gauss_point_setting();
 
         std::cout << "matrix initialize" << std::endl;
+
+        Fluid.CSR_initialize(Fluid.inb,Fluid.numOfNode,1);
+        Solid.CSR_initialize(Solid.inb,Solid.numOfNode,1);
+        Vessel.CSR_initialize(Vessel.inb,Vessel.numOfNode,1);
+
         Fluid.matrix_initialize();
         Solid.matrix_initialize();
         Vessel.matrix_initialize();
-
+        
         std::cout << "calc matrix" << std::endl;
         Fluid.calc_matrix();
         Solid.calc_matrix();

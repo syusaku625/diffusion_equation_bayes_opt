@@ -7,6 +7,7 @@ target_sources(Base
     matrix.cpp
     two_dimensional.cpp
     fileIO.cpp
+    csr_matrix.cpp
 )
 
 target_include_directories(Base

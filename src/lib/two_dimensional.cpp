@@ -52,14 +52,14 @@ void twodimensinal_diffusion::gauss_point_setting()
 
 void twodimensinal_diffusion::matrix_initialize()
 {
-    D.resize(numOfNode);
-    for(int i=0; i<numOfNode; i++){
-      D[i].resize(numOfNode);
-    }
-    mass.resize(numOfNode);
-    for(int i=0; i<numOfNode; i++){
-      mass[i].resize(numOfNode);
-    }
+    //D.resize(numOfNode);
+    //for(int i=0; i<numOfNode; i++){
+    //  D[i].resize(numOfNode);
+    //}
+    //mass.resize(numOfNode);
+    //for(int i=0; i<numOfNode; i++){
+    //  mass[i].resize(numOfNode);
+    //}
     mass_centralization.resize(numOfNode);
 }
 
@@ -105,6 +105,8 @@ void twodimensinal_diffusion::calc_matrix()
   double detJ;
   int numOfInElm = 4;
 
+  vector<vector<vector<double>>> K(numOfElm, vector<vector<double>>(4, vector<double>(4, 0.0)));
+
   for(int i=0; i<numOfElm; i++){
     for(int j=0; j<4; j++){
       ShapeFunction2D::C2D4_N(N,gauss[j][0],gauss[j][1]);
@@ -115,12 +117,13 @@ void twodimensinal_diffusion::calc_matrix()
       calc_dNdx(dNdx, dNdr, drdx);
       for(int k=0; k<4; k++){
         for(int l=0; l<4; l++){
-          D[element[i][k]][element[i][l]] += diffusion_coefficient * (dNdx[k][0]*dNdx[l][0]+dNdx[k][1]*dNdx[l][1]) * phi[i] * detJ;
+          K[i][k][l] += diffusion_coefficient * (dNdx[k][0]*dNdx[l][0]+dNdx[k][1]*dNdx[l][1]) * phi[i] * detJ;
           mass_centralization[element[i][k]] += N[k] * N[l] * phi[i] * detJ;
         }
       }
     }
   }
+  set_CSR_value1D(K,element,numOfNode,numOfElm,inb);
 }
 
 void twodimensinal_diffusion::boundary_setting(double time_t, vector<double> Q_cv, vector<double> Q_iv)
@@ -188,12 +191,21 @@ void twodimensinal_diffusion::time_step(vector<double> Q1, vector<double> Q2, do
         cell_to_point_cv[i].first /= double(cell_to_point_cv[i].second);
         cell_to_point_ci[i].first /= double(cell_to_point_ci[i].second);
       }
-      #pragma omp for
+      //#pragma omp for
+      //for(int i=0; i<numOfNode; i++){
+      //  for(int j=0; j<numOfNode; j++){
+      //      DC[i] += D[i][j] * (C[j]);
+      //  }
+      //}
+
+      #pragma omp parallel for
       for(int i=0; i<numOfNode; i++){
-        for(int j=0; j<numOfNode; j++){
-            DC[i] += D[i][j] * (C[j]);
+        DC[i] = 0;
+        for(int j = ptr[i]; j < ptr[i+1]; j++){
+          DC[i] += value[j] * C[index[j]];
         }
       }
+
       #pragma omp for
       for(int i=0; i<numOfNode; i++){
         DcR[i] = DC[i]-(-cell_to_point_cv[i].first+cell_to_point_ci[i].first);
@@ -228,12 +240,21 @@ void twodimensinal_diffusion::time_step(vector<double> Q1, vector<double> Q2, do
         cell_to_point_iv[i].first /= (double)cell_to_point_iv[i].second;
         cell_to_point_ci[i].first /= (double)cell_to_point_ci[i].second;
       }
-      #pragma omp for
+      //#pragma omp for
+      //for(int i=0; i<numOfNode; i++){
+      //  for(int j=0; j<numOfNode; j++){
+      //      DC[i] += D[i][j] * (C[j]);
+      //  }
+      //}
+
+      #pragma omp parallel for
       for(int i=0; i<numOfNode; i++){
-        for(int j=0; j<numOfNode; j++){
-            DC[i] += D[i][j] * (C[j]);
+        DC[i] = 0;
+        for(int j = ptr[i]; j < ptr[i+1]; j++){
+          DC[i] += value[j] * C[index[j]];
         }
       }
+
       #pragma omp for
       for(int i=0; i<numOfNode; i++){
         DcR[i] = DC[i]-(-cell_to_point_iv[i].first-cell_to_point_ci[i].first);
