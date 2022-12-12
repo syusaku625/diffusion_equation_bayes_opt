@@ -49,15 +49,30 @@ class twodimensinal_diffusion{
         std::vector<std::vector<double>> D;
         std::vector<std::vector<double>> gauss;
         std::vector<double> evaluation_phi;
+
+        //-----------csr variable--------------
+        std::vector<std::vector<int>> ieb, inb;
+        int nnz;
+        std::vector<int> ptr, index;
+        std::vector<double> value;
+        //-------------------------------------
+
         TextParser tp;
         void phase_set(std::string mat){
             material_judge=mat;
         }
-        void export_vtu(const std::string &file, std::string judge, std::vector<double> output_value);
-        void input_info(std::string input_file);
-        void input_phi();
+
+        //file input output function-------------------------------------------------------------------fileIO.cpp
         int CountNumbersOfTextLines(std::string &filePath);
         void read_geometry();
+        void input_phi();
+        void input_info(std::string input_file);
+        void export_vtu(const std::string &file, std::string judge, std::vector<double> output_value);
+        void dump(int ic);
+        void hdf5_dump(int ic);
+        void exportHDF5_double_1D(H5::H5File &file, const std::string &dataName, std::vector<double> i_data, int i_dim);
+        //------------------------------------------------------------------------------------------------------
+        
         void boundary_initialize();
         void calc_dxdr(int ic, std::vector<std::vector<double>> node, std::vector<std::vector<int>> element, std::vector<std::vector<double>> &dxdr, std::vector<std::vector<double>> dNdr);
         void calc_dNdx(std::vector<std::vector<double>> &dNdx, std::vector<std::vector<double>> dNdr, std::vector<std::vector<double>> drdx);
@@ -67,15 +82,21 @@ class twodimensinal_diffusion{
         void calc_matrix();
         void boundary_setting(double time, std::vector<double> Q_cv, std::vector<double> Q_iv);
         void time_step(std::vector<double> Q1, std::vector<double> Q2, double time);
-
-        void dump(int ic);
-        void hdf5_dump(int ic);
-        void exportHDF5_double_1D(H5::H5File &file, const std::string &dataName, std::vector<double> i_data, int i_dim);
         double access_c(int ic);
         void transform_point_data_to_cell_data(std::vector<double> &element_C, std::vector<double> C);
         void transform_point_data_to_cell_data_phi(std::vector<double> &phiC, std::vector<double> C);
         void reset();
         //void MKL_matrix_product(const std::vector<std::vector<double>> A_r, const std::vector<double> B_r, std::vector<double> &C_r, int m, int k, int n);
+
+        //csr function-------------------------------------------------------------------------------------------- csr_matrix.cpp
+        void calc_adjacent_nodes();
+        void calc_adjacent_elements();
+        void CSR_initialize(const std::vector<std::vector<int>> &inb,const int &numOfNode,const int &dim);
+        void CSR_ptr_initialize(const std::vector<std::vector<int>> &inb,const int &numOfNode,const int &dim);
+        void CSR_index_initialize(const std::vector<std::vector<int>> &inb,const int &numOfNode,const int &dim);
+        void set_CSR_value1D(std::vector<std::vector<std::vector<double>>> &K,const std::vector<std::vector<int>> &element,const int &numOfNode,
+                               const int &numOfElm,const std::vector<std::vector<int>> &inb);
+
 
 };
 #endif

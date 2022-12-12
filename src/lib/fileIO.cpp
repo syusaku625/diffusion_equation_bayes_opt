@@ -276,6 +276,12 @@ void twodimensinal_diffusion::input_info(std::string input_file)
     mkdir(outputDir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
     cout << "Read geometry" << endl;
     read_geometry();
+    ieb.resize(numOfNode,vector<int>(0));
+    inb.resize(numOfNode,vector<int>(0));
+    cout << "calc_adjacent_elements" << endl;
+    calc_adjacent_elements();
+    cout << "calc_adjacent_nodes" << endl;
+    calc_adjacent_nodes();
     cout << "Read phi" << endl;
     input_phi();
     cout << "boundary initialize" << endl;
