@@ -495,7 +495,8 @@ void DiffusionModel::hdf5_export_parameter_and_cost_function(H5::H5File &file, c
   delete[] data;
 }
 
-void DiffusionModel::hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, const double r_ci, const double r_ic)
+void DiffusionModel::hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, \
+const double r_ci, const double r_ic, const double D_csf, const double D_isf)
 {
   H5std_string FILE_NAME(output_h5_name.c_str());
   if (ic == 0) {
@@ -516,6 +517,10 @@ void DiffusionModel::hdf5_dump(const std::string output_h5_name, const int ic, c
     hdf5_export_parameter_and_cost_function(file, dataName, r_vi);
     dataName = Gr + "/r_iv";
     hdf5_export_parameter_and_cost_function(file, dataName, r_iv);
+    dataName = Gr + "/D_csf";
+    hdf5_export_parameter_and_cost_function(file, dataName, D_csf);
+    dataName = Gr + "/D_isf";
+    hdf5_export_parameter_and_cost_function(file, dataName, D_isf);
   }
   else {
     H5File file(FILE_NAME, H5F_ACC_RDWR);
@@ -535,5 +540,9 @@ void DiffusionModel::hdf5_dump(const std::string output_h5_name, const int ic, c
     hdf5_export_parameter_and_cost_function(file, dataName, r_vi);
     dataName = Gr + "/r_iv";
     hdf5_export_parameter_and_cost_function(file, dataName, r_iv);
+    dataName = Gr + "/D_csf";
+    hdf5_export_parameter_and_cost_function(file, dataName, D_csf);
+    dataName = Gr + "/D_isf";
+    hdf5_export_parameter_and_cost_function(file, dataName, D_isf);
   }
 }

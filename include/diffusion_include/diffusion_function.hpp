@@ -33,13 +33,46 @@
 #include <boost/numeric/ublas/assignment.hpp>
 #include "bayesopt/bayesopt.hpp"
 #include "specialtypes.hpp"
+#include "shapefunction.hpp"
 #include "two_diffusion.hpp"
 
 class DiffusionModel: public bayesopt::ContinuousModel
 {
 public:
     DiffusionModel(bayesopt::Parameters par):
-    ContinuousModel(6,par) {}
+    ContinuousModel(8,par) {}
+
+    void calc_matrix(twodimensinal_diffusion &Fluid, twodimensinal_diffusion &Solid, const vectord& xin)
+    {
+      int numOfInElm = 4;
+      std::vector<std::vector<std::vector<double>>> Fluid_K(Fluid.numOfElm, std::vector<std::vector<double>>(4, std::vector<double>(4, 0.0)));
+      std::vector<std::vector<std::vector<double>>> Solid_K(Fluid.numOfElm, std::vector<std::vector<double>>(4, std::vector<double>(4, 0.0)));
+      #pragma omp parallel for
+      for(int i=0; i<Fluid.numOfElm; i++){
+        for(int j=0; j<4; j++){
+          std::vector<double> N(4); 
+          std::vector<std::vector<double>> dNdr(4, std::vector<double>(2));
+          std::vector<std::vector<double>> dxdr(2, std::vector<double>(2)), drdx(2, std::vector<double>(2));
+          std::vector<std::vector<double>> dNdx(4, std::vector<double>(2, 0.0));
+          ShapeFunction2D::C2D4_N(N,Fluid.gauss[j][0],Fluid.gauss[j][1]);
+          ShapeFunction2D::C2D4_dNdr(dNdr,Fluid.gauss[j][0],Fluid.gauss[j][1]);
+          Fluid.calc_dxdr(i, Fluid.node, Fluid.element, dxdr, dNdr);
+          Fluid.calc_inverse_matrix_2x2(dxdr, drdx);
+          double detJ = dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1];
+          Fluid.calc_dNdx(dNdx, dNdr, drdx);
+          for(int k=0; k<4; k++){
+            for(int l=0; l<4; l++){
+              Fluid_K[i][k][l] += xin(6) * (dNdx[k][0]*dNdx[l][0]+dNdx[k][1]*dNdx[l][1]) * Fluid.phi[i] * detJ;
+              Solid_K[i][k][l] += xin(7) * (dNdx[k][0]*dNdx[l][0]+dNdx[k][1]*dNdx[l][1]) * Solid.phi[i] * detJ;
+              Fluid.mass_centralization[Fluid.element[i][k]] += N[k] * N[l] * Fluid.phi[i] * detJ;
+              Solid.mass_centralization[Fluid.element[i][k]] += N[k] * N[l] * Solid.phi[i] * detJ;
+            }
+          }
+        }
+      }
+      Fluid.set_CSR_value1D(Fluid_K,Fluid.element,Fluid.numOfNode,Fluid.numOfElm,Fluid.inb);
+      Solid.set_CSR_value1D(Solid_K,Solid.element,Solid.numOfNode,Solid.numOfElm,Solid.inb);
+    }
 
     void Init(std::string input_file){
         Fluid.phase_set("F");
@@ -66,8 +99,8 @@ public:
         Vessel.matrix_initialize();
         
         std::cout << "calc matrix" << std::endl;
-        Fluid.calc_matrix();
-        Solid.calc_matrix();
+        //Fluid.calc_matrix();
+        //Solid.calc_matrix();
 
         std::cout << "set boundary" << std::endl;
         Q_vc.resize(Vessel.numOfNode); Q_cv.resize(Vessel.numOfNode);
@@ -81,7 +114,8 @@ public:
     };
 
     double evaluateSample( const vectord& xin){
-        
+        std::cout << "calc matrix" << std::endl;
+        calc_matrix(Fluid, Solid, xin);
         for(int i=0; i<Vessel.time; i++){
             std::vector<double> element_C_vessel(Vessel.numOfElm), element_C_Fluid(Fluid.numOfElm), element_C_Solid(Solid.numOfElm);
             Vessel.transform_point_data_to_cell_data(element_C_vessel, Vessel.C);
@@ -133,8 +167,10 @@ public:
             evaluation += pow(evaluation_phi[i]-C_sum[i],2.0);
         }
         evaluation /= Vessel.numOfElm;
-        std::cout << "r_vc:" << xin(0) << " " << "r_cv:" << xin(1) << " " << "r_vi:" << xin(2) << " " << "r_iv:" << xin(3) << " " << "r_ci:" << xin(4) << " " << "r_ic:" << xin(5) << " " << "J:" << evaluation << std::endl;
-        hdf5_dump("r_parameter.h5", iter_count, xin(0), xin(1), xin(2), xin(3), xin(4), xin(5 ));
+        std::cout << "r_vc:" << xin(0) << " " << "r_cv:" << xin(1) << " " << "r_vi:" << xin(2) << " " << "r_iv:" << xin(3) << " " << "r_ci:" << xin(4) \
+        << " " << "r_ic:" << xin(5) << " " << "D_csf:" << xin(6) << " " << "D_isf:" << xin(7) << " " << "J:" << evaluation << std::endl;
+        
+        hdf5_dump("r_parameter.h5", iter_count, xin(0), xin(1), xin(2), xin(3), xin(4), xin(5), xin(6), xin(7));
 
         Vessel.reset();
         Fluid.reset();
@@ -186,7 +222,7 @@ public:
     }
     
     void hdf5_export_parameter_and_cost_function(H5::H5File &file, const std::string &dataName, const double i_data);
-    void hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, const double r_ci, const double r_ic);
+    void hdf5_dump(const std::string output_h5_name, const int ic, const double r_vc, const double r_cv, const double r_vi, const double r_iv, const double r_ci, const double r_ic, const double D_csf, const double D_isf);
 
 
 };
