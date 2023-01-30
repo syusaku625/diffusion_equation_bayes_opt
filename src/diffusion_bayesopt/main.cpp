@@ -11,7 +11,7 @@ int main(int argc,char *argv[])
   //parameter settings
   bayesopt::Parameters par;
   par = initialize_parameters_to_default();
-  par.n_iterations = 5000;
+  par.n_iterations = 100;
   par.noise = 1e-2;
   par.random_seed = 0;
   par.verbose_level = 1;

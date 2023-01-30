@@ -1,0 +1,19 @@
+{
+    "C_Cpp.errorSquiggles": "enabled",
+
+    "files.associations": {
+        "*.tcc": "cpp",
+        "ostream": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp"
+    },
+
+    "git.ignoreLimitWarning": true,
+
+    "cmake.sourceDirectory": "${workspaceFolder}/.",
+
+    "glassit.alpha": 220,
+    
+    "editor.stickyScroll.enabled": true,
+    "editor.stickyScroll.maxLineCount": 5
+}

@@ -115,8 +115,9 @@ public:
         iter_count=0;
     };
 
-    double evaluateSample( const vectord& xin){
-        
+    double evaluateSample( const vectord &xin) {
+        double J = 0.0;
+
         for(int i=0; i<Vessel.time; i++){
             std::vector<double> element_C_vessel(Vessel.numOfElm), element_C_Fluid(Fluid.numOfElm), element_C_Solid(Solid.numOfElm);
             Vessel.transform_point_data_to_cell_data(element_C_vessel, Vessel.C);
@@ -152,30 +153,35 @@ public:
             Fluid.time_step(Q_vc, Q_ci, Vessel.dt*i);
             Solid.time_step(Q_vi, Q_ci, Vessel.dt*i);
 
-            if(i%Vessel.output_interval==0){
-                std::vector<double> Vessel_phiC(Vessel.numOfElm),CSF_phiC(Fluid.numOfElm),ISF_phiC(Solid.numOfElm);
-                Vessel.transform_point_data_to_cell_data_phi(Vessel_phiC, Vessel.C);
-                Fluid.transform_point_data_to_cell_data_phi(CSF_phiC, Fluid.C);
-                Solid.transform_point_data_to_cell_data_phi(ISF_phiC, Solid.C);
-                for(int j=0; j<Vessel.numOfElm; j++){
-                  C_sum[j] = Vessel_phiC[j] + CSF_phiC[j] + ISF_phiC[j];
-                }
+            std::vector<double> Vessel_phiC(Vessel.numOfElm),CSF_phiC(Fluid.numOfElm),ISF_phiC(Solid.numOfElm);
+            Vessel.transform_point_data_to_cell_data_phi(Vessel_phiC, Vessel.C);
+            Fluid.transform_point_data_to_cell_data_phi(CSF_phiC, Fluid.C);
+            Solid.transform_point_data_to_cell_data_phi(ISF_phiC, Solid.C);
+            for(int j=0; j<Vessel.numOfElm; j++){
+              C_sum[j] = Vessel_phiC[j] + CSF_phiC[j] + ISF_phiC[j];
             }
+            double tmpJ = 0.0;
+            for(int j = 0; j < Vessel.numOfElm; j++) {
+              tmpJ += pow(evaluation_phi[j]-C_sum[j],2.0);
+            }
+            J += tmpJ/Vessel.time;
         }
         
-        double evaluation=0.0;
-        for(int i=0; i<Vessel.numOfElm; i++){
-            evaluation += pow(evaluation_phi[i]-C_sum[i],2.0);
-        }
-        evaluation /= Vessel.numOfElm;
+        //double evaluation=0.0;
+        //for(int i=0; i<Vessel.numOfElm; i++){
+        //    evaluation += pow(evaluation_phi[i]-C_sum[i],2.0);
+        //}
+        //evaluation /= Vessel.numOfElm;
         std::cout << "r_vc:" << xin(0) << " " << "r_cv:" << xin(1) << " " << "r_vi:" << xin(2) << " " << "r_iv:" << xin(3) << " " << "r_ci:" << xin(4) << " " << "r_ic:" << xin(5) << " " << "J:" << evaluation << std::endl;
-        hdf5_dump("r_parameter.h5", iter_count, xin(0), xin(1), xin(2), xin(3), xin(4), xin(5 ));
+        //hdf5_dump("r_parameter.h5", iter_count, xin(0), xin(1), xin(2), xin(3), xin(4), xin(5 ));
 
         Vessel.reset();
         Fluid.reset();
         Solid.reset();
         iter_count++;
-        return evaluation;
+
+        return J;
+        //return evaluation;
     };
 
   bool checkReachability(const vectord &query)

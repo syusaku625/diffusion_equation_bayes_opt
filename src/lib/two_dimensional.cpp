@@ -128,6 +128,8 @@ void twodimensinal_diffusion::calc_matrix()
 
 void twodimensinal_diffusion::boundary_setting(double time_t, vector<double> Q_cv, vector<double> Q_iv)
 {
+  const double start_injection = 60.0;
+
   if(material_judge=="F" || material_judge== "S"){
     for(int i=0; i<numOfBoundaryNode; i++){
       C[boundary_node[i]] = boundary_value[i];
@@ -148,17 +150,15 @@ void twodimensinal_diffusion::boundary_setting(double time_t, vector<double> Q_c
       cell_to_point_cv[i].first /= cell_to_point_cv[i].second;
       cell_to_point_iv[i].first /= cell_to_point_iv[i].second;
     }
-    double sum_1=0.0;
-    double sum_2=0.0;
     for(int i=0; i<numOfBoundaryNode; i++){
-      if(time_t<60.0){ 
+      if(time_t < start_injection){ 
         C[boundary_node[i]] = 0.0;
       }
-      if(time_t>=60.0 && time_t<=120.0){ 
-        C[boundary_node[i]] = ((boundary_value[i]/60.0)*time_t-1.0-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
+      if(time_t >= start_injection && time_t <= start_injection+60.0){ 
+        C[boundary_node[i]] = ((boundary_value[i]/60.0)*(time_t - (start_injection-60.0)) - 1.0-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
       }
-      if(time_t>120.0) {
-        C[boundary_node[i]] = ((-boundary_value[i]/480.0)*time_t+(5.0/4.0)-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
+      if(time_t > start_injection+60.0) {
+        C[boundary_node[i]] = ((-boundary_value[i]/480.0)*(time_t - (start_injection-60.0)) + (5.0/4.0)-dt*cell_to_point_cv[boundary_node[i]].first-dt*cell_to_point_iv[boundary_node[i]].first)*boundary_value[i];
       }
     }
   }
